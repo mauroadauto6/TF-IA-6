@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Data Fraud</title>
+    <link rel="stylesheet" href="../static/css/styleM.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Data Fraud detection</h1>
+        <div id="fraud-alert" style="display: none;">Nuevo fraude detectado</div>
+        <div id="data-container">
+        </div>
+    </div>
+
+    <script>
+        const dataContainer = document.getElementById('data-container');
+        const fraudAlert = document.getElementById('fraud-alert');
+        const source = new EventSource('/events');
+
+        source.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+
+            // Crea una nueva tabla para los datos
+            const newTable = document.createElement('table');
+            newTable.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Etiqueta</th>
+                        <th>Dato</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>first</td>
+                        <td>${data['first']}</td>
+                    </tr>
+                    <tr>
+                        <td>last</td>
+                        <td>${data['last']}</td>
+                    </tr>
+                    <tr>
+                        <td>amt</td>
+                        <td>${data['amt']}</td>
+                    </tr>
+                    <tr>
+                        <td>category</td>
+                        <td>${data['category']}</td>
+                    </tr>
+                    <tr>
+                        <td>trans_date_trans_time</td>
+                        <td>${data['trans_date_trans_time']}</td>
+                    </tr>
+                    <tr>
+                        <td>lat</td>
+                        <td>${data['lat']}</td>
+                    </tr>
+                    <tr>
+                        <td>long</td>
+                        <td>${data['long']}</td>
+                    </tr>
+                    <tr>
+                        <td>merch_lat</td>
+                        <td>${data['march_lat']}</td>
+                    </tr>
+                    <tr>
+                        <td>merch_long</td>
+                        <td>${data['merch_long']}</td>
+                    </tr>
+                </tbody>
+            `;
+
+            // Agrega la nueva tabla al contenedor de datos
+            dataContainer.insertBefore(newTable, dataContainer.firstChild);
+
+            // Muestra la alerta de "Nuevo fraude detectado"
+            fraudAlert.style.display = 'block';
+        };
+    </script>
+</body>
+</html>
