@@ -7,7 +7,7 @@
 
 
 ## Ejecución del programa
-** Abrir, _mediante VSCode y por separado_, wspace y wspace2**
+**Abrir, _mediante VSCode y por separado_, wspace y wspace2**
 1. Para 'wspace' 
 - Ejecutar main.py
 + Abrir página 'http://127.0.0.1:5000/'
