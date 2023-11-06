@@ -25,6 +25,8 @@ def preProcess_data(purchaseData):
     columns_out = ['Unnamed: 0', 'cc_num', 'merchant', 'state', 'first', 'last', 'gender', 'street', 'city', 'zip', 'city', 'job', 'dob', 'trans_num', 'unix_time']
     # Leer un csv con todas las variables
     dataRaw = pd.read_csv('fraudTest.csv')
+    # en caso de fallo utilizar https://drive.google.com/file/d/1tV4hk-HvnWZPo5WvAl82-STOuTvKkVAN/view?usp=sharing
+    # dataRaw = pd.read_csv('fraudTrain.csv')
     dataRaw = dataRaw.drop(columns=columns_out)
     purchaseData = purchaseData.drop(columns=columns_out)
     # Guardar solo categorias en otra variable
