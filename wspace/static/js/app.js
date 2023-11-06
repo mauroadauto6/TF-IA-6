@@ -25,9 +25,21 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function generateRandomPurchase() {
+    const randomDateTime = () => {
+        const y = 2019; 
+        const y2 = 2024;  
+        const year = y + Math.floor(Math.random() * (y2 - y + 1));
+        const month = 1 + Math.floor(Math.random() * 12); 
+        const day = 1 + Math.floor(Math.random() * 28); 
+        const hours = Math.floor(Math.random() * 24); 
+        const minutes = Math.floor(Math.random() * 60); 
+        const seconds = Math.floor(Math.random() * 60); 
+
+        return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')} ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
     const data = {
         'Unnamed: 0': Math.floor(Math.random() * 1000),
-        'trans_date_trans_time': new Date().toISOString(),
+        'trans_date_trans_time': randomDateTime(), 
         'cc_num': Math.floor(Math.random() * 10000000000000000),
         'merchant': 'Random Merchant ' + Math.floor(Math.random() * 100),
         'category': ['entertainment', 'food_dining', 'gas_transport', 'grocery_net', 'grocery_pos', 'health_fitness', 'home', 'kids_pets', 'misc_net', 'misc_pos', 'personal_care', 'shopping_net', 'shopping_pos', 'travel'][Math.floor(Math.random() * 14)],
@@ -48,7 +60,7 @@ function generateRandomPurchase() {
         'unix_time': Math.floor(Date.now() / 1000),
         'merch_lat': Math.random() * 90,
         'merch_long': Math.random() * 180,
-        'is_fraud': Math.random() < 0.1 ? 1 : 0, // 10% chance of fraud
+        'is_fraud': Math.random() < 0.35 ? 1 : 0, // 35% chance of fraud
     };
     return data;
 }
