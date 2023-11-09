@@ -11,7 +11,9 @@ app = Flask(__name__)
 
 json_folder = os.path.join(os.path.dirname(__file__), 'json')
 print(json_folder)
-model = tf.keras.models.load_model('detectorV2.h5')
+model_folder = os.path.join(os.path.dirname(__file__), 'modelo', 'detectorV2.h5')
+print(model_folder)
+model = tf.keras.models.load_model(model_folder)
 
 def get_latest_json():
     json_files = [f for f in os.listdir(json_folder) if f.endswith('.json')]
@@ -24,7 +26,8 @@ def get_latest_json():
 def preProcess_data(purchaseData):
     columns_out = ['Unnamed: 0', 'cc_num', 'merchant', 'state', 'first', 'last', 'gender', 'street', 'city', 'zip', 'city', 'job', 'dob', 'trans_num', 'unix_time']
     # Leer un csv con todas las variables
-    dataRaw = pd.read_csv('fraudTest.csv')
+    csv_file = os.path.join(os.path.dirname(__file__), 'fraudTest.csv')
+    dataRaw = pd.read_csv(csv_file)
     # en caso de fallo utilizar https://drive.google.com/file/d/1tV4hk-HvnWZPo5WvAl82-STOuTvKkVAN/view?usp=sharing
     # dataRaw = pd.read_csv('fraudTrain.csv')
     dataRaw = dataRaw.drop(columns=columns_out)

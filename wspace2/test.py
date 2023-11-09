@@ -7,6 +7,7 @@ import pandas as pd
 import tensorflow as tf
 import numpy as np
 
+"""
 json_folder = os.path.join(os.path.dirname(__file__), 'json')
 print(json_folder)
 model = tf.keras.models.load_model('detectorV2.h5')
@@ -41,7 +42,6 @@ def preProcess_data(purchaseData):
     X['day'] = pd.to_datetime(purchaseData['trans_date_trans_time']).dt.dayofweek
     X['month'] = pd.to_datetime(purchaseData['trans_date_trans_time']).dt.month
     X = X.drop(columns=['trans_date_trans_time'])
-    
     scaler = StandardScaler()
     X = scaler.fit_transform(X)
     X = scaler.transform(X)
@@ -54,14 +54,25 @@ def generate_events():
     print('EVENT')
     while True:
         data = get_latest_json()
-        if data and data.get('is_fraud') == 1:
+        if data:
             if data != last_json:
                 last_json = data
                 json_data = pd.DataFrame([data])
                 json_data = preProcess_data(json_data)
+                print(json_data)
                 prediction = model.predict(json_data)
+                print(prediction)
+                print(prediction[0][0])
                 if prediction[0][0] == 1.0:
-                    print(data)
+                    print(data['merch_lat'])
+                else: 
+                    print('Not fraud')
         time.sleep(2)  #
 
-generate_events()
+generate_events()"""
+
+rawCSV_folder = os.path.join('datasets', 'fraudTest.csv')
+print(rawCSV_folder)
+
+folder = os.path.join(os.path.dirname(__file__), 'datasets')
+print(folder)

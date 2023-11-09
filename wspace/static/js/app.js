@@ -1,29 +1,3 @@
-document.addEventListener('DOMContentLoaded', function () {
-
-    // Wait for the document to load before adding event listeners
-    const purchaseButton = document.getElementById('purchase-button');
-
-    purchaseButton.addEventListener('click', function () {
-        // Create a new element for the popup message
-        const popupMessage = document.createElement('div');
-        popupMessage.className = 'popup-message';
-        popupMessage.innerText = 'Purchase Completed';
-
-        // Position the popup next to the purchase button
-        const buttonRect = purchaseButton.getBoundingClientRect();
-        popupMessage.style.top = buttonRect.top + 'px';
-        popupMessage.style.left = (buttonRect.right + 10) + 'px';
-
-        // Append the popup message to the document body
-        document.body.appendChild(popupMessage);
-
-        // Close the popup after a few seconds (adjust the time as needed)
-        setTimeout(function () {
-            popupMessage.style.display = 'none';
-        }, 1500);
-    });
-});
-
 function generateRandomPurchase() {
     const randomDateTime = () => {
         const y = 2019; 
@@ -37,7 +11,7 @@ function generateRandomPurchase() {
 
         return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')} ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     }
-    const data = {
+    return {
         'Unnamed: 0': Math.floor(Math.random() * 1000),
         'trans_date_trans_time': randomDateTime(), 
         'cc_num': Math.floor(Math.random() * 10000000000000000),
@@ -62,7 +36,6 @@ function generateRandomPurchase() {
         'merch_long': Math.random() * 180,
         'is_fraud': Math.random() < 0.35 ? 1 : 0, // 35% chance of fraud
     };
-    return data;
 }
 
 function displayPurchaseData(purchaseData) {
@@ -73,16 +46,15 @@ function displayPurchaseData(purchaseData) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    const purchaseButton = document.getElementById('purchase-button');
-    purchaseButton.addEventListener('click', function () {
-        specific_name = generateRandomPurchase().first;
-        specific_last = generateRandomPurchase().last;
-        specific_date = generateRandomPurchase().trans_date_trans_time;
+    function generatePurchase(){
+        const randomPurchase = generateRandomPurchase();
+
+        specific_name = randomPurchase.first;
+        specific_last = randomPurchase.last;
+        specific_date = randomPurchase.trans_date_trans_time;
 
         specific_data = [specific_name, specific_last, specific_date];
-        const randomPurchase = specific_data;
 
-        // Send the data to the server in the desired JSON format
         fetch('/save_purchase', {
             method: 'POST',
             headers: {
@@ -114,11 +86,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 "is_fraud": generateRandomPurchase().is_fraud
             }),
         })
-            .then(response => response.json())
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        
-        displayPurchaseData(randomPurchase);
-    });
+        .then(response => response.json())
+        .catch(error => {
+            console.error('Error:', error);
+        });
+
+        displayPurchaseData(specific_data);
+    }
+    
+    function generatePurchaseInterval() {
+        setInterval(generatePurchase, 2500);
+    }
+    
+    generatePurchaseInterval();
 });
+
+
