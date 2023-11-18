@@ -11,9 +11,11 @@ app = Flask(__name__)
 
 json_folder = os.path.join(os.path.dirname(__file__), 'json')
 print(json_folder)
-model_folder = os.path.join(os.path.dirname(__file__), 'modelo', 'detectorV2.h5')
+model_folder = os.path.join(os.path.dirname(__file__), 'modelo', 'detectorV6.h5')
 print(model_folder)
 model = tf.keras.models.load_model(model_folder)
+df_directory = os.path.join(os.path.dirname(__file__), 'dataset', 'fraudTest.csv')
+dataRaw = pd.read_csv(df_directory)
 
 def get_latest_json():
     json_files = [f for f in os.listdir(json_folder) if f.endswith('.json')]
@@ -25,24 +27,22 @@ def get_latest_json():
 
 def preProcess_data(purchaseData):
     columns_out = ['Unnamed: 0', 'cc_num', 'merchant', 'state', 'first', 'last', 'gender', 'street', 'city', 'zip', 'city', 'job', 'dob', 'trans_num', 'unix_time']
-    # Leer un csv con todas las variables
-    csv_file = os.path.join(os.path.dirname(__file__), 'fraudTest.csv')
-    dataRaw = pd.read_csv(csv_file)
-    # en caso de fallo utilizar https://drive.google.com/file/d/1tV4hk-HvnWZPo5WvAl82-STOuTvKkVAN/view?usp=sharing
-    # dataRaw = pd.read_csv('fraudTrain.csv')
+    dataRaw = pd.read_csv(df_directory)
     dataRaw = dataRaw.drop(columns=columns_out)
+    
     purchaseData = purchaseData.drop(columns=columns_out)
+    
     # Guardar solo categorias en otra variable
     categories = dataRaw['category'].unique()
     OH_categories = pd.DataFrame(False, index=[0], columns=[f'cat_{category}' for category in categories])
     
     X = pd.get_dummies(purchaseData, columns=['category'], prefix=['cat'])
-    X = X.drop(columns=['is_fraud'])
+    #X = X.drop(columns=['is_fraud'])
     print(X)
     common_columns = OH_categories.columns.intersection(X.columns).tolist()
     OH_categories = OH_categories[OH_categories.columns.difference(common_columns)]
     
-    X = pd.concat([X, OH_categories], axis=1)
+    X = pd.concat([X, OH_categories])
     
     X['hour'] = pd.to_datetime(purchaseData['trans_date_trans_time']).dt.hour
     X['day'] = pd.to_datetime(purchaseData['trans_date_trans_time']).dt.dayofweek
@@ -57,25 +57,25 @@ def preProcess_data(purchaseData):
     return X
 
 def generate_events():
-    last_json = None
+    dataRaw = pd.read_csv(df_directory)
     print('EVENT')
     while True:
-        data = get_latest_json()
-        if data:
-            if data != last_json:
-                last_json = data
-                json_data = pd.DataFrame([data])
-                json_data = preProcess_data(json_data)
-                predict = model.predict(json_data)
-                predicted = (predict > 0.5).astype(float)
-                print(predicted)
-                if predicted[0][0] == 1.0:
-                    yield f"data: {json.dumps(data)}\n\n"
-        time.sleep(2)  # Comprueba cada 2 segundos si hay cambios en la carpeta JSON
+        data_index = get_latest_json()
+        data = dataRaw.iloc[data_index]
+        print(data)
+        if not data.empty:
+            json_data = preProcess_data(data)
+            predict = model.predict(json_data)
+            predicted = (predict > 0.5).astype(float)
+            print('Tag:{}, Prediction:{}'.format(json_data['is_fraud'], predicted))
+            if predicted[0][0] == 1:
+                yield f"data: {json.dumps(data)}\n\n"
+        time.sleep(2) 
 
 @app.route('/')
 def mostrar_json():
-    data = get_latest_json()
+    data_index = get_latest_json()
+    data = dataRaw.iloc[data_index]
     return render_template('monitor.html', data=data)
 
 @app.route('/events')

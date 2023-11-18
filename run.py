@@ -10,7 +10,7 @@ from wspace.main import app as mainAPP
 from wspace2.monitor import app as monitorAPP
 
 def run_main():
-    mainAPP.run()
+    mainAPP.run(port=5000)
 
 def run_monitor():
     monitorAPP.run(port=5001, threaded=True)
