@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FRAUD DETECTOR</title>
+    <link rel="stylesheet" href="../static/css/styleM.css">
+</head>
+<body>
+    <div class="container">
+        <h1>DATA FRAUD DETECTION</h1>
+        <div id="fraud-alert" style="display: none;">FRAUD DETECTED!</div>
+        <div id="data-container">
+        </div>
+    </div>
+
+    <script>
+        const dataContainer = document.getElementById('data-container');
+        const fraudAlert = document.getElementById('fraud-alert');
+        const source = new EventSource('/events');
+
+        source.onmessage = function (event) {
+            const data = JSON.parse(event.data)[0];
+
+            // Crea una nueva tabla para los datos
+            const newTable = document.createElement('table');
+            newTable.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Etiqueta</th>
+                        <th>Dato</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${Object.entries(data).map(([key, value]) => `
+                        <tr>
+                            <td>${key}</td>
+                            <td>${value}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+
+            // Agrega la nueva tabla al contenedor de datos
+            dataContainer.insertBefore(newTable, dataContainer.firstChild);
+
+            // Muestra la alerta de "Nuevo fraude detectado"
+            fraudAlert.style.display = 'block';
+        };
+    </script>
+</body>
+</html>

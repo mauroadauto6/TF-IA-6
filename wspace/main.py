@@ -1,22 +1,19 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template
 import pandas as pd
 import os
 import random
 import json
-import requests
 
 app = Flask(__name__)
 
-# Leer fraudTest.csv
+# Read the dataset
 df_directory = os.path.join(os.path.dirname(__file__), 'dataset', 'fraudTest.csv')
 df = pd.read_csv(df_directory)
 
-# Cargar la página principal
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# Obtener una linea del dataset
 @app.route('/getTransRow')
 def getTransRow():
     index = random.randint(0, len(df) - 1)
@@ -27,7 +24,7 @@ def getTransRow():
         'TransCategoy': row['category']
     }
     
-    # Saving row as a json
+    # Saving row's index
     json_row_dir = os.path.join(os.path.dirname(__file__), '../wspace2/json')
     if not os.path.exists(json_row_dir):
         os.makedirs(json_row_dir)
