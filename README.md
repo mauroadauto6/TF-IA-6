@@ -8,3 +8,6 @@
 
 ## Ejecución del programa
 **Ejecutar run.py**
+
+## NOTITA AMIGABLE
+Ambas páginas tardan un poco en iniciar. Cuando dejen de cargar actualizar la página y se mostrará la app.

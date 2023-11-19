@@ -28,10 +28,9 @@ def getTransRow():
     json_row_dir = os.path.join(os.path.dirname(__file__), '../wspace2/json')
     if not os.path.exists(json_row_dir):
         os.makedirs(json_row_dir)
-        
+    
     json_file = os.path.join(json_row_dir, 'row.json')
-    with open(json_file, 'w') as json_file:
-        json.dump(index, json_file)
+    df.to_json(json_file, orient='records')
     
     #print(specific_data)
     return json.dumps(specific_data)
