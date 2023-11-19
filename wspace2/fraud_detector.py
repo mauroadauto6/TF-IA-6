@@ -17,12 +17,18 @@ model = tf.keras.models.load_model(model_folder)
 df_directory = os.path.join(os.path.dirname(__file__), 'dataset', 'fraudTest.csv')
 dataRaw = pd.read_csv(df_directory)
 # Clean dataset
+# prediction dataset
 columns_out = ['Unnamed: 0', 'cc_num', 'merchant', 'state', 'first', 'last', 'gender', 'street', 'city', 'zip', 'city', 'job', 'dob', 'trans_num', 'unix_time']
 testData = dataRaw.drop(columns=columns_out)
+# to be shown dataset
+another_col_out = ['Unnamed: 0', 'merchant', 'gender', 'street', 'job', 'dob', 'trans_num', 'unix_time']
+showData = dataRaw.drop(columns=another_col_out)
 # Dataset Headers
 headers = testData.columns.tolist()
+complete_headers = showData.columns.tolist()
 # General dataframe for prediction
 purchaseData = pd.DataFrame(index=[0], columns=headers)
+printData = pd.DataFrame(index=[0], columns=complete_headers)
 # Dataset Category Headers
 categories = testData['category'].unique()
 OH_categories = pd.DataFrame(False, index=[0], columns=[f'cat_{category}' for category in categories])
@@ -71,26 +77,32 @@ def preProcess_data(purchaseData):
 def generate_events():
     print('EVENT')
     while True:
-        # Obtain one random row from the dataset
+        # Obtain one random row from the dataset to be preditec
         data_index = get_index_json()
         row_data = testData.iloc[data_index].tolist()
         purchaseData.loc[0] = row_data
+        
+        # Prepare data to be shown
+        sh_row_data = showData.iloc[data_index].tolist()
+        printData.loc[0] = sh_row_data
         print(purchaseData.head())
         if not purchaseData.empty:
             data = preProcess_data(purchaseData)
             predict = model.predict(data)
-            predicted = (predict > 0.5).astype(float)
-            print('Tag:{}, Prediction:{}'.format(purchaseData['is_fraud'], predicted[0][0]))
+            predicted = (predict > 0.5).astype(int)
+            print('Tag:{}, Prediction:{}%'.format(purchaseData['is_fraud'], predicted[0][0]*100))
             if predicted[0][0] == 1:
-                yield f"data: {json.dumps(purchaseData.head().to_dict(orient='records'))}\n\n"
-        time.sleep(2) 
+                yield f"data: {json.dumps(printData.head().to_dict(orient='records'))}\n\n"
+        time.sleep(3.5) 
 
 @app.route('/')
 def show_data():
     data_index = get_index_json()
-    row_data = testData.iloc[data_index].tolist()
-    purchaseData.loc[0] = row_data
-    return render_template('fraud_detector.html', data=purchaseData.head().to_dict(orient='records'))
+    row_data = showData.iloc[data_index].tolist()
+    printData.loc[0] = row_data
+    data = printData.head().to_dict(orient='records')
+    print(data)
+    return render_template('fraud_detector.html', data=data)
 
 @app.route('/events')
 def sse():

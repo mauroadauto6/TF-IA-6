@@ -1,15 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>FRAUD DETECTOR</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Fraud Detector</title>
     <link rel="stylesheet" href="../static/css/styleM.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </head>
 <body>
-    <div class="container">
+    <header>
         <h1>DATA FRAUD DETECTION</h1>
+    </header>
+    <div class="container">
         <div id="fraud-alert" style="display: none;">FRAUD DETECTED!</div>
-        <div id="data-container">
-        </div>
+        <div id="data-container"></div>
     </div>
 
     <script>
@@ -20,17 +29,24 @@
         source.onmessage = function (event) {
             const data = JSON.parse(event.data)[0];
 
-            // Crea una nueva tabla para los datos
+            const specific_data = Object.fromEntries(
+                Object.entries(data).filter(([key]) => key !== 'city_pop' && key !== 'lat' && key !== 'long' && key !== 'merch_lat' && key !== 'merch_long' && key !== 'is_fraud')
+            );
+
+            const newRow = document.createElement('div');
+            newRow.classList.add('row');
+
             const newTable = document.createElement('table');
+            newTable.classList.add('table');
             newTable.innerHTML = `
                 <thead>
                     <tr>
-                        <th>Etiqueta</th>
-                        <th>Dato</th>
+                        <th>Tag</th>
+                        <th>Value</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${Object.entries(data).map(([key, value]) => `
+                    ${Object.entries(specific_data).map(([key, value]) => `
                         <tr>
                             <td>${key}</td>
                             <td>${value}</td>
@@ -39,12 +55,59 @@
                 </tbody>
             `;
 
-            // Agrega la nueva tabla al contenedor de datos
-            dataContainer.insertBefore(newTable, dataContainer.firstChild);
+            newRow.appendChild(newTable);
 
-            // Muestra la alerta de "Nuevo fraude detectado"
+            const map_container = document.createElement('div');
+            map_container.id = 'map-container-' + data.index;
+            map_container.classList.add('map-container');
+            map_container.style.height = '300px';
+            newRow.appendChild(map_container);
+
+            dataContainer.insertBefore(newRow, dataContainer.firstChild);
+
             fraudAlert.style.display = 'block';
+            
+            // Distance between lat-long and merch_lat-merch_long
+            const distance = calculateDistance(
+                parseFloat(data.lat),
+                parseFloat(data.long),
+                parseFloat(data.merch_lat),
+                parseFloat(data.merch_long)
+            );
+
+            const map = L.map(map_container.id).setView([parseFloat(data.merch_lat), parseFloat(data.merch_long)], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            L.marker([parseFloat(data.merch_lat), parseFloat(data.merch_long)]).addTo(map);
+            L.marker([parseFloat(data.lat), parseFloat(data.long)]).addTo(map);
+
+            const polyline = L.polyline(
+                [[parseFloat(data.lat), parseFloat(data.long)],[parseFloat(data.merch_lat), parseFloat(data.merch_long)]],
+                { color: 'orange' }
+            ).addTo(map);
+
+            const bounds = L.latLngBounds([parseFloat(data.lat), parseFloat(data.long)], [parseFloat(data.merch_lat), parseFloat(data.merch_long)]);
+            map.fitBounds(bounds);
+
+            const distanceRow = document.createElement('tr');
+            distanceRow.innerHTML = `<td>TransDistance</td><td>${distance.toFixed(2)} km</td>`;
+            newTable.querySelector('tbody').appendChild(distanceRow);
         };
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth r
+            const dLat = (lat2 - lat1) * (Math.PI / 180);
+            const dLon = (lon2 - lon1) * (Math.PI / 180);
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const distance = R * c;
+            return distance;
+        }
+
     </script>
 </body>
 </html>

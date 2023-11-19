@@ -2,10 +2,10 @@ body {
     font-family: 'Rubik', sans-serif;
     margin: 0;
     padding: 0;
+    background-color: rgb(8, 8, 41);
 }
 
 header {
-    background-color: #333;
     color: white;
     text-align: center;
     padding: 1em;
@@ -13,13 +13,13 @@ header {
 
 main {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    border: 2px solid black;
+    flex-wrap: wrap; 
+    /* justify-content: space-between; */
+    /* border: 2px solid black; */
 }
 
 #trans-list {
-    border: 2px solid red;
+    /* border: 2px solid red; */
     width: 100%;
     list-style: none;
     column-count: 2;
@@ -27,8 +27,10 @@ main {
     margin: 0;
 }
 #trans-list li {
-    border: 2px solid blue;
-    background-color: #f9f9f9;
+    color: white;
+    border: 2px solid rgb(59, 59, 59);
+    border-radius: 10px;
     padding: 2%;
+    margin-bottom: 2px;
     word-break: break-all;
 }

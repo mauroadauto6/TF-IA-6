@@ -21,7 +21,8 @@ def getTransRow():
     specific_data = {
         'Name': row['first'],
         'Last': row['last'],
-        'TransCategoy': row['category']
+        'TransCategory': row['category'],
+        'State': row['state']
     }
     
     # Saving row's index
