@@ -67,7 +67,7 @@ def preProcess_data(purchaseData):
     final_row = final_row.drop(columns=['trans_date_trans_time'])
     #print(final_row)
     
-    # Standarize
+    # Scale
     scaler = StandardScaler()
     final_row = scaler.fit_transform(final_row)
     final_row = scaler.transform(final_row)
