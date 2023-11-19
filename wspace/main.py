@@ -1,14 +1,12 @@
 from flask import Flask, render_template
 import pandas as pd
 import os
-import random
 import json
 
 app = Flask(__name__)
 
 # Read the dataset
 df_directory = os.path.join(os.path.dirname(__file__), 'dataset', 'fraudTest.csv')
-df = pd.read_csv(df_directory)
 
 @app.route('/')
 def index():
@@ -16,13 +14,14 @@ def index():
 
 @app.route('/getTransRow')
 def getTransRow():
-    index = random.randint(0, len(df) - 1)
-    row = df.iloc[index]
+    df = pd.read_csv(df_directory).sample(1)
+    index = int(df.index[0])
+    print(index)
     specific_data = {
-        'Name': row['first'],
-        'Last': row['last'],
-        'TransCategory': row['category'],
-        'State': row['state']
+        'Name': df['first'].iloc[0],
+        'Last': df['last'].iloc[0],
+        'TransCategory': df['category'].iloc[0],
+        'State': df['state'].iloc[0]
     }
     
     # Saving row's index
